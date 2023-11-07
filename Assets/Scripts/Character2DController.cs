@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class Character2DController : MonoBehaviour
+public class Character2DController : MonoState<Character2DController>
 {
     [Header("Move")]
     [SerializeField]
@@ -29,6 +30,13 @@ public class Character2DController : MonoBehaviour
     [SerializeField]
     float jumpGraceTime = 0.20F;
 
+    [Header("Attack")]
+    [SerializeField]
+    Transform attackPoint;
+
+    [SerializeField]
+    LayerMask enemyMask;
+
     [Header("Animation")]
     [SerializeField]
     Animator animator;
@@ -40,13 +48,17 @@ public class Character2DController : MonoBehaviour
     bool _isMoving;
     bool _isJumping;
     bool _isJumpPressed;
+    bool _isAttacking;
 
     float _gravityY;
     float _lastTimeJumpPressed;
+    float _meleeDamage;
 
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         _rb = GetComponent<Rigidbody2D>();
         _gravityY = -Physics2D.gravity.y;
     }
@@ -140,6 +152,7 @@ public class Character2DController : MonoBehaviour
         bool isNegativeVelocityY = _rb.velocity.y < -0.01F;
         if (isNegativeVelocityY != isFalling) 
         {
+            animator.SetBool("isJumping", false);
             animator.SetBool("isFalling", isNegativeVelocityY);
         }
 
@@ -151,5 +164,28 @@ public class Character2DController : MonoBehaviour
             Physics2D.OverlapCapsule(
                 groundCheck.position, new Vector2(1.13F, 0.30F), 
                     CapsuleDirection2D.Horizontal, 0.0F, groundMask);
+    }
+
+    public void Attack(float damage)
+    {
+        if (_isAttacking)
+        {
+            return;   
+        }
+
+        _isAttacking = true;
+        _meleeDamage = damage;
+        animator.SetBool("attack", true);
+    }
+
+    public void Attack()
+    {
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(attackPoint.position, 0.2F, enemyMask);
+        foreach (Collider2D c in enemies)
+        {
+            //codigo para hacer daño
+        }
+        _isAttacking = false;
+        animator.SetBool("attack", false);
     }
 }
