@@ -18,7 +18,7 @@ public class Character2DController : MonoState<Character2DController>
     float jumpForce = 140.0F;
 
     [SerializeField]
-    float fallMultiplier = 3.0F;
+    float fallMultiplier = 1.5F;
 
     //Verificar el piso
     [SerializeField]
